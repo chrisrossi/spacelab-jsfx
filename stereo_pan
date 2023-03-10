@@ -1,0 +1,73 @@
+ / Copyright (C) 2008  Chris Rossi
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+desc: spacelab stereo pan
+
+slider1:0<-1,1>pan
+slider2:1<-1,1>width
+slider3:-1<-1,1>left
+slider4:1<-1,1>right
+
+@init
+
+pan = slider1;
+width = slider2;
+left = slider3;
+right = slider4;
+
+@slider
+
+(pan != slider1) ? (
+  pan = slider1;
+  
+  wiggle_room = 1 - abs(pan);
+  
+  (width > wiggle_room) ? (
+    width = wiggle_room;
+  );
+) :
+
+(width != slider2) ? (
+  width = slider2;
+
+  wiggle_room = 1 - abs(width);
+
+  (pan > wiggle_room) ? (
+    pan = wiggle_room;
+  ) : (pan < -wiggle_room) ? (
+    pan = -wiggle_room;
+  );
+);
+
+left = pan - width;
+right = pan + width;
+
+slider1 = pan;
+slider2 = width;
+slider3 = left;
+slider4 = right;
+
+ll = (left - 1) / -2;  // left input to left output
+lr = 1 - ll;           // left input to right output
+rl = (right - 1) / -2; // right input to left output
+rr = 1 - rl;           // right input to right output
+
+@sample
+
+li = spl0;  // left input
+ri = spl1;  // right input
+
+spl0 = (li * ll) + (ri * rl);  // left output
+spl1 = (ri * rr) + (li * lr);  // right output
